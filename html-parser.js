@@ -33,88 +33,86 @@ ParserInput.prototype.toString = function() {
 }
 
 var makeParser = function(executor) {
-	return { parse: function(haystack) {
-		if (typeof haystack == "string") {
-			debugLog("Made new input out of '" + haystack + "'");
-			haystack = new ParserInput(haystack);
-		}
-		return executor(haystack);
-	} };
-};
 
-var chr = function(needle) {
-	return makeParser(function(input) {
-		debugLog("str(" + needle + ")", input);
-		input.mark();
+	return function(optionalSubParsersArray) {
 
-		var chr = input.next();
-
-		debugLog("Checking", chr, " against ", needle);
-		if (chr === needle) {
-			return chr;
+		var subParsers;
+		if (optionalSubParsersArray && optionalSubParsersArray.length && arguments.length == 1) {
+			subParsers = optionalSubParsersArray;
 		} else {
-			input.rollback();
-			return null;
+			subParsers = Array.prototype.slice.call(arguments);
 		}
 
-	});
+		debugLog("Generating new parser with", subParsers);
+		return {
+			parse: function(input) {
+				if (typeof input == "string") {
+					debugLog("Made new input out of '" + input + "'");
+					input = new ParserInput(input);
+				}
+				return executor(input, subParsers);
+			}
+		};
+	};
 };
 
-var digit = function() {
+var chr = makeParser(function(input, needle) {
+	debugLog("str(" + needle + ")", input);
+	input.mark();
 
-	return makeParser(function(input) {
-		debugLog("digit()", input);
-		input.mark();
+	var chr = input.next();
 
-		var chr = input.next();
-
-		debugLog("Checking", chr, "for digitness");
-		if ( !isNaN(parseInt(chr)) ) {
-			return chr;
-		} else {
-			input.rollback();
-			return null;
-		}
-
-	});
-
-};
-
-var seq = function(optionalSubParsersArray) {
-
-	var subParsers;
-	if (optionalSubParsersArray.length && arguments.length == 1) {
-		subParsers = optionalSubParsersArray;
+	debugLog("Checking", chr, " against ", needle);
+	if (chr === needle) {
+		return chr;
 	} else {
-		subParsers = Array.prototype.slice.call(arguments);
+		input.rollback();
+		return null;
 	}
 
-	return makeParser(function(input) {
-		debugLog("seq(" + subParsers.join(',') + ")", input);
-		input.mark();
+});
 
-		var result = "";
+var digit = makeParser(function(input) {
+	debugLog("digit()", input);
+	input.mark();
 
-		var success = subParsers.every(function(n) {
-			var needleResult = n.parse(input);
-			if (needleResult !== null) {
-				debugLog("Sequence worked! ", needleResult);
-				result += needleResult;
-				return true;
-			} else {
-				return false;
-			}
-		});
+	var chr = input.next();
 
-		if (success) {
-			return result;
+	debugLog("Checking", chr, "for digitness");
+	if ( !isNaN(parseInt(chr)) ) {
+		return chr;
+	} else {
+		input.rollback();
+		return null;
+	}
+});
+
+var seq = makeParser(function(input, subParsers) {
+
+	debugLog("seq(" + subParsers.join(',') + ")", input);
+	input.mark();
+
+	var result = "";
+
+	var success = subParsers.every(function(n) {
+		var needleResult = n.parse(input);
+		if (needleResult !== null) {
+			debugLog("Sequence worked! ", needleResult);
+			result += needleResult;
+			return true;
 		} else {
-			input.rollback();
-			return null;
+			return false;
 		}
-
 	});
-};
+
+	if (success) {
+		return result;
+	} else {
+		input.rollback();
+		return null;
+	}
+
+});
 
 
 var word = function(needle) {
