@@ -1,9 +1,11 @@
-window.debug = false;
+// window.debug = true;
+// window.debugLogContent = "";
 
 var debugLog = function() {
 	if (window.debug == true) {
 		var args = Array.prototype.slice.call(arguments);
 		console.log(args.join(" "));
+		// window.debugLogContent += args.join(" ") + "\n";
 	}
 };
 
@@ -49,18 +51,25 @@ var makeParser = function(name, executor) {
 					debugLog("Made new input out of '" + input + "'");
 					input = new ParserInput(input);
 				}
-				return executor(input, subParsers);
+				debugLog("" + name + "(" + subParsers.join(',') + ")");
+				input.mark();
+				
+				var result = executor(input, subParsers);
+				
+				if (result === null) {
+					input.rollback();
+				}
+
+				return result;
 			}
 		};
 	};
 };
 
 var chr = makeParser("chr", function(input, subParsers) {
-
 	var needle = subParsers[0];
 
-	debugLog("str(" + needle + ")", input);
-	input.mark();
+	debugLog("chr(" + needle + ")", input);
 
 	var chr = input.next();
 
@@ -68,7 +77,6 @@ var chr = makeParser("chr", function(input, subParsers) {
 	if (chr === needle) {
 		return chr;
 	} else {
-		input.rollback();
 		return null;
 	}
 
@@ -76,7 +84,6 @@ var chr = makeParser("chr", function(input, subParsers) {
 
 var digit = (makeParser("digit", function(input) {
 	debugLog("digit", input);
-	input.mark();
 
 	var chr = input.next();
 
@@ -84,14 +91,12 @@ var digit = (makeParser("digit", function(input) {
 	if ( !isNaN(parseInt(chr)) ) {
 		return chr;
 	} else {
-		input.rollback();
 		return null;
 	}
 }))();
 
 var wsChar = (makeParser("wsChar", function(input) {
 	debugLog("wsChar", input);
-	input.mark();
 
 	var chr = input.next();
 
@@ -99,14 +104,12 @@ var wsChar = (makeParser("wsChar", function(input) {
 	if ( chr.match(/\s/) ) {
 		return chr;
 	} else {
-		input.rollback();
 		return null;
 	}
 }))();
 
 var many = makeParser("many", function(input, subParsers) {
 	debugLog("many(" + subParsers.join(',') + ")", input);
-	input.mark();
 
 	var result = "";
 
@@ -122,14 +125,12 @@ var many = makeParser("many", function(input, subParsers) {
 	if (result.length > 0) {
 		return result;
 	} else {
-		input.rollback();
 		return null;
 	}
 });
 
 var any = makeParser("any", function(input, subParsers) {
 	debugLog("any(" + subParsers.join(',') + ")", input);
-	input.mark();
 
 	var result = "";
 
@@ -148,7 +149,6 @@ var any = makeParser("any", function(input, subParsers) {
 
 var seq = makeParser("seq", function(input, subParsers) {
 	debugLog("seq(" + subParsers.join(',') + ")", input);
-	input.mark();
 
 	var result = "";
 
@@ -166,7 +166,6 @@ var seq = makeParser("seq", function(input, subParsers) {
 	if (success) {
 		return result;
 	} else {
-		input.rollback();
 		return null;
 	}
 });
