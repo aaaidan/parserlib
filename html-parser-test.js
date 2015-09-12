@@ -53,7 +53,10 @@ function testEqual(title, executor, expectedValue) {
 	if (!title || !title.length) {
 		title = "Untitled Test";
 	}
-	var result = executor();
+
+	var result;
+	try { result = executor(); } catch(e) { result = e; }
+
 	if (result !== expectedValue) {
 		console.warn("Failed Test:", title, "Expected: ", expectedValue, "but got:", result);
 		testsFailed++;
@@ -61,7 +64,7 @@ function testEqual(title, executor, expectedValue) {
 		console.log("Passed:", title);
 		testsPassed++;
 	}
-};
+}; 
 
 testEqual(
     "chr doesn't parse wrong char", function() { 
