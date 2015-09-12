@@ -1,48 +1,4 @@
-console.log("html-parser-test.js");
-
-/*
-var TestVM = function(title, testFunc, argFactory) {
-	this.title = title;
-	this.test = testFunc;
-	this.argFactory = argFactory;
-	this.status = ko.observable("unknown");
-};
-TestVM.prototype.run = function() {
-	this.test.apply(null, this.argFactory());
-}
-
-var TestCollectionVM = function() {
-	this.tests = ko.observableArray();
-	this.argFactory = function() {
-		return [1,2,3];
-	}
-};
-TestCollectionVM.prototype.add = function(title, testFunc) {
-	this.tests.push(new TestVM(title, testFunc, this.argFactory));
-};
-TestCollectionVM.prototype.setArgumentFactory = function(factory) {
-	this.argFactory = factory;
-};
-TestCollectionVM.prototype.runAll = function() {
-	this.tests().forEach(function(test) {
-		test.run();
-	});
-};
-
-
-var htmlParserTestsVM = new TestCollectionVM();
-htmlParserTestsVM.setArgumentFactory(function() {
-	return [ HtmlParser ];
-});
-htmlParserTestsVM.add("parses a number", function() {
-	console.log("Parsing a number", arguments);
-	HtmlParser.numberDigit().;
-});
-
-ko.applyBindings(htmlParserTestsVM);
-
-htmlParserTestsVM.runAll();
-*/
+console.log("parser-builder-test.js");
 
 (function() {
 
@@ -220,13 +176,3 @@ if (testsFailed == 0) {
 }
 
 })();
-
-/*
-var tagName = or(str("b"), str("i"), str("u"));
-var tag = seq(str("<"), tagName, str(">"));
-
-tag.parse("<b>");
-tag.parse("<hr>");
-tag.parse("</hr>");
-tag.parse("<b><i>");
-*/
