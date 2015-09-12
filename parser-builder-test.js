@@ -77,6 +77,20 @@ testEqual(
     "seq returns nothing when one of its elements fails", function() { 
     return seq(digit, digit, digit).parse("6a60"); }, null);
 
+// or
+testEqual(
+    "or works 1", function() { 
+    return or(chr("a"), chr("b")).parse("a"); }, "a");
+testEqual(
+    "or works 2", function() { 
+    return or(chr("a"), chr("b")).parse("b"); }, "b");
+testEqual(
+    "or fails correctly", function() { 
+    return or(chr("a"), chr("b")).parse("c"); }, null);
+testEqual(
+    "or parses only what it's asked", function() { 
+    return or(chr("a"), chr("b")).parse("abc"); }, "a");
+
 // word
 testEqual(
     "word only parses correct input", function() { 

@@ -69,11 +69,7 @@ var makeParser = function(name, executor) {
 var chr = makeParser("chr", function(input, subParsers) {
 	var needle = subParsers[0];
 
-	debugLog("chr(" + needle + ")", input);
-
 	var chr = input.next();
-
-	debugLog("Checking", chr, " against ", needle);
 	if (chr === needle) {
 		return chr;
 	} else {
@@ -83,11 +79,8 @@ var chr = makeParser("chr", function(input, subParsers) {
 });
 
 var digit = (makeParser("digit", function(input) {
-	debugLog("digit", input);
-
 	var chr = input.next();
 
-	debugLog("Checking", chr, "for digitness");
 	if ( !isNaN(parseInt(chr)) ) {
 		return chr;
 	} else {
@@ -96,11 +89,8 @@ var digit = (makeParser("digit", function(input) {
 }))();
 
 var wsChar = (makeParser("wsChar", function(input) {
-	debugLog("wsChar", input);
-
 	var chr = input.next();
 
-	debugLog("Checking", chr, "for whitespaceness");
 	if ( chr.match(/\s/) ) {
 		return chr;
 	} else {
@@ -109,8 +99,6 @@ var wsChar = (makeParser("wsChar", function(input) {
 }))();
 
 var many = makeParser("many", function(input, subParsers) {
-	debugLog("many(" + subParsers.join(',') + ")", input);
-
 	var result = "";
 
 	if (subParsers.length > 1) { throw new Error("many only takes one parser"); }
@@ -130,8 +118,6 @@ var many = makeParser("many", function(input, subParsers) {
 });
 
 var any = makeParser("any", function(input, subParsers) {
-	debugLog("any(" + subParsers.join(',') + ")", input);
-
 	var result = "";
 
 	if (subParsers.length > 1) { throw new Error("any only takes one parser"); }
@@ -147,15 +133,16 @@ var any = makeParser("any", function(input, subParsers) {
 
 });
 
-var seq = makeParser("seq", function(input, subParsers) {
-	debugLog("seq(" + subParsers.join(',') + ")", input);
+var or = makeParser("or", function(input, subParsers) {
 
+});
+
+var seq = makeParser("seq", function(input, subParsers) {
 	var result = "";
 
 	var success = subParsers.every(function(n) {
 		var needleResult = n.parse(input);
 		if (needleResult !== null) {
-			debugLog("Sequence worked! ", needleResult);
 			result += needleResult;
 			return true;
 		} else {
