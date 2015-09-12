@@ -32,7 +32,7 @@ ParserInput.prototype.toString = function() {
 	return "[ParserInput "+ this._i + ":" + this.str.charAt(this._i) +"]";
 }
 
-var makeParser = function(executor) {
+var makeParser = function(name, executor) {
 
 	return function(optionalSubParsersArray) {
 
@@ -43,8 +43,12 @@ var makeParser = function(executor) {
 			subParsers = Array.prototype.slice.call(arguments);
 		}
 
-		debugLog("Generating new parser with", subParsers);
+		debugLog("Generating new " + name + " parser with", subParsers );
+
 		return {
+			toString: function() {
+				return "[Parser " + name + "]";
+			},
 			parse: function(input) {
 				if (typeof input == "string") {
 					debugLog("Made new input out of '" + input + "'");
@@ -56,7 +60,7 @@ var makeParser = function(executor) {
 	};
 };
 
-var chr = makeParser(function(input, needle) {
+var chr = makeParser("chr", function(input, needle) {
 	debugLog("str(" + needle + ")", input);
 	input.mark();
 
@@ -72,7 +76,7 @@ var chr = makeParser(function(input, needle) {
 
 });
 
-var digit = makeParser(function(input) {
+var digit = makeParser("digit", function(input) {
 	debugLog("digit()", input);
 	input.mark();
 
@@ -87,7 +91,7 @@ var digit = makeParser(function(input) {
 	}
 });
 
-var seq = makeParser(function(input, subParsers) {
+var seq = makeParser("seq", function(input, subParsers) {
 
 	debugLog("seq(" + subParsers.join(',') + ")", input);
 	input.mark();
