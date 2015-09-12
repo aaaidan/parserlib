@@ -61,7 +61,7 @@ function testEqual(title, executor, expectedValue) {
 		console.warn("Failed Test:", title, "Expected: ", expectedValue, "but got:", result);
 		testsFailed++;
 	} else {
-		console.log("Passed:", title);
+		//console.log("Passed:", title);
 		testsPassed++;
 	}
 }; 
@@ -78,7 +78,7 @@ function testThrows(title, executor) {
 		console.warn("Failed Test:", title, "Expected a thrown error, but executed without error.");
 		testsFailed++;
 	} else {
-		console.log("Passed:", title);
+		//console.log("Passed:", title);
 		testsPassed++;
 	}
 };
