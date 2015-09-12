@@ -36,12 +36,7 @@ var makeParser = function(name, executor) {
 
 	return function(optionalSubParsersArray) {
 
-		var subParsers;
-		if (optionalSubParsersArray && optionalSubParsersArray.length && arguments.length == 1) {
-			subParsers = optionalSubParsersArray;
-		} else {
-			subParsers = Array.prototype.slice.call(arguments);
-		}
+		var subParsers = Array.prototype.slice.call(arguments);
 
 		debugLog("Generating new " + name + " parser with", subParsers );
 
@@ -60,7 +55,10 @@ var makeParser = function(name, executor) {
 	};
 };
 
-var chr = makeParser("chr", function(input, needle) {
+var chr = makeParser("chr", function(input, subParsers) {
+
+	var needle = subParsers[0];
+
 	debugLog("str(" + needle + ")", input);
 	input.mark();
 
@@ -76,7 +74,7 @@ var chr = makeParser("chr", function(input, needle) {
 
 });
 
-var digit = makeParser("digit", function(input) {
+var digit = (makeParser("digit", function(input) {
 	debugLog("digit()", input);
 	input.mark();
 
@@ -89,7 +87,7 @@ var digit = makeParser("digit", function(input) {
 		input.rollback();
 		return null;
 	}
-});
+}))();
 
 var seq = makeParser("seq", function(input, subParsers) {
 
@@ -120,11 +118,8 @@ var seq = makeParser("seq", function(input, subParsers) {
 
 
 var word = function(needle) {
-
 	var characterParsers = needle.split('').map(function(needleCharacter) {
 		return chr(needleCharacter);
 	});
-
-	return seq(characterParsers); // using alternate signature for seq: using array of parsers (not argument list)
-
+	return seq.apply(null, characterParsers); // using alternate signature for seq: using array of parsers (not argument list)
 };

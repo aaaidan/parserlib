@@ -66,6 +66,19 @@ function testEqual(title, executor, expectedValue) {
 	}
 }; 
 
+
+// digit
+testEqual(
+    "digit doesn't parse wrong char", function() { 
+    return digit.parse("a"); }, null);
+testEqual(
+    "digit parses correct input", function() { 
+    return digit.parse("5"); }, "5");
+testEqual(
+    "digit parses only what it's asked", function() { 
+    return digit.parse("5273"); }, "5");
+
+// chr
 testEqual(
     "chr doesn't parse wrong char", function() { 
     return chr("b").parse("a"); }, null);
@@ -75,6 +88,8 @@ testEqual(
 testEqual(
     "chr parses only what it's asked", function() { 
     return chr("a").parse("abc"); }, "a");
+
+// seq
 testEqual(
     "seq works with chr", function() { 
     return seq(chr("a"), chr("b")).parse("ab"); }, "ab");
@@ -83,13 +98,12 @@ testEqual(
     return seq(chr("a"), chr("b")).parse("abc"); }, "ab");
 testEqual(
     "seq parses only what it's asked with digit", function() { 
-    return seq(digit(),digit(),digit()).parse("6460"); }, "646");
+    return seq(digit, digit, digit).parse("6460"); }, "646");
 testEqual(
     "seq returns nothing when one of its elements fails", function() { 
-    return seq(digit(),digit(),digit()).parse("6a60"); }, null);
-testEqual(
-    "seq can be called with an array (rather than arguments)", function() { 
-    return seq([chr("a"),chr("b"),chr("c")]).parse("abcd"); }, "abc");
+    return seq(digit, digit, digit).parse("6a60"); }, null);
+
+// word
 testEqual(
     "word only parses correct input", function() { 
     return word("abc").parse("abc"); }, "abc");
@@ -99,6 +113,7 @@ testEqual(
 testEqual(
     "word fails correctly", function() { 
     return word("abc").parse("abdc"); }, null);
+
 
 console.log("Tests Passed:", testsPassed);
 if (testsFailed == 0) {
