@@ -75,7 +75,7 @@ var chr = makeParser("chr", function(input, subParsers) {
 });
 
 var digit = (makeParser("digit", function(input) {
-	debugLog("digit()", input);
+	debugLog("digit", input);
 	input.mark();
 
 	var chr = input.next();
@@ -89,8 +89,64 @@ var digit = (makeParser("digit", function(input) {
 	}
 }))();
 
-var seq = makeParser("seq", function(input, subParsers) {
+var wsChar = (makeParser("wsChar", function(input) {
+	debugLog("wsChar", input);
+	input.mark();
 
+	var chr = input.next();
+
+	debugLog("Checking", chr, "for whitespaceness");
+	if ( chr.match(/\s/) ) {
+		return chr;
+	} else {
+		input.rollback();
+		return null;
+	}
+}))();
+
+var many = makeParser("many", function(input, subParsers) {
+	debugLog("many(" + subParsers.join(',') + ")", input);
+	input.mark();
+
+	var result = "";
+
+	if (subParsers.length > 1) { throw new Error("many only takes one parser"); }
+
+	var subParser = subParsers[0];
+
+	var subParserResult;
+	while ( (subParserResult = subParser.parse(input)) !== null ) {
+		result += subParserResult;
+	}
+
+	if (result.length > 0) {
+		return result;
+	} else {
+		input.rollback();
+		return null;
+	}
+});
+
+var any = makeParser("any", function(input, subParsers) {
+	debugLog("any(" + subParsers.join(',') + ")", input);
+	input.mark();
+
+	var result = "";
+
+	if (subParsers.length > 1) { throw new Error("any only takes one parser"); }
+	
+	var subParser = subParsers[0];
+
+	var subParserResult;
+	while ( (subParserResult = subParser.parse(input)) !== null ) {
+		result += subParserResult;
+	}
+
+	return result;
+
+});
+
+var seq = makeParser("seq", function(input, subParsers) {
 	debugLog("seq(" + subParsers.join(',') + ")", input);
 	input.mark();
 
@@ -113,13 +169,14 @@ var seq = makeParser("seq", function(input, subParsers) {
 		input.rollback();
 		return null;
 	}
-
 });
 
+var _ = many(wsChar);
+var __ = any(wsChar);
 
 var word = function(needle) {
 	var characterParsers = needle.split('').map(function(needleCharacter) {
 		return chr(needleCharacter);
 	});
-	return seq.apply(null, characterParsers); // using alternate signature for seq: using array of parsers (not argument list)
+	return seq.apply(null, characterParsers);
 };
