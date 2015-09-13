@@ -8,6 +8,27 @@ var debugLog = function() {
 		// window.debugLogContent += args.join(" ") + "\n";
 	}
 };
+var debugWarn = function() {
+	if (window.debug == true) {
+		var args = Array.prototype.slice.call(arguments);
+		console.warn(args.join(" "));
+		// window.debugLogContent += args.join(" ") + "\n";
+	}
+};
+var debugGroup = function(name) {
+	if (window.debug == true) {
+		var args = Array.prototype.slice.call(arguments);
+		console.group(name);
+		// window.debugLogContent += args.join(" ") + "\n";
+	}
+};
+var debugGroupEnd = function() {
+	if (window.debug == true) {
+		var args = Array.prototype.slice.call(arguments);
+		console.groupEnd();
+		// window.debugLogContent += args.join(" ") + "\n";
+	}
+};
 
 debugLog("html-parser.js");
 
@@ -34,13 +55,18 @@ ParserInput.prototype.toString = function() {
 	return "[ParserInput "+ this._i + ":" + this.str.charAt(this._i) +"]";
 }
 
-var makeParser = function(name, executor) {
+var constructParser = function(name, executor, autoConvertStrings) {
+	// This is what the parser developer calls.
 
-	return function(optionalSubParsersArray) {
+	if (typeof autoConvertStrings == "undefined") {
+		autoConvertStrings = true;
+	}
+
+	return function buildParser() {
+		// This is what the parser builder calls, e.g. or(), seq(), ...
 
 		var subParsers = Array.prototype.slice.call(arguments);
-
-		debugLog("Generating new " + name + " parser with", subParsers );
+		debugLog("Generating new " + name + " parser with", subParsers);
 
 		return {
 			toString: function() {
@@ -48,16 +74,38 @@ var makeParser = function(name, executor) {
 			},
 			parse: function(input) {
 				if (typeof input == "string") {
-					debugLog("Made new input out of '" + input + "'");
 					input = new ParserInput(input);
 				}
-				debugLog("" + name + "(" + subParsers.join(',') + ")");
+
+				if (autoConvertStrings) {
+					// This automatically converts literal strings into
+					// a 'word' parser. or("b", "i", "u") --> or(word("b"), ...);
+					subParsers = subParsers.map(function(p) {
+						if (typeof p == "string") {
+							if (p.length == 1) {
+								return chr(p);
+							} else {
+								return word(p);
+							}
+						}
+						return p;
+					});
+				}
+				
 				input.mark();
 				
+				debugGroup(name + "(" + subParsers.join(',') + ")");
+				debugLog("Parsing:", input.toString());
+
 				var result = executor(input, subParsers);
-				
+
+				debugGroupEnd();
+
 				if (result === null) {
+					debugWarn("RESULT: Failed");
 					input.rollback();
+				} else {
+					debugLog("RESULT: Success");
 				}
 
 				return result;
@@ -66,7 +114,7 @@ var makeParser = function(name, executor) {
 	};
 };
 
-var chr = makeParser("chr", function(input, subParsers) {
+var chr = constructParser("chr", function(input, subParsers) {
 	var needle = subParsers[0];
 
 	var chr = input.next();
@@ -76,9 +124,9 @@ var chr = makeParser("chr", function(input, subParsers) {
 		return null;
 	}
 
-});
+}, false);
 
-var digit = (makeParser("digit", function(input) {
+var digit = (constructParser("digit", function(input) {
 	var chr = input.next();
 
 	if ( !isNaN(parseInt(chr)) ) {
@@ -88,7 +136,7 @@ var digit = (makeParser("digit", function(input) {
 	}
 }))();
 
-var wsChar = (makeParser("wsChar", function(input) {
+var wsChar = (constructParser("wsChar", function(input) {
 	var chr = input.next();
 
 	if ( chr.match(/\s/) ) {
@@ -98,7 +146,7 @@ var wsChar = (makeParser("wsChar", function(input) {
 	}
 }))();
 
-var many = makeParser("many", function(input, subParsers) {
+var many = constructParser("many", function(input, subParsers) {
 	var result = "";
 
 	if (subParsers.length > 1) { throw new Error("many only takes one parser"); }
@@ -117,7 +165,7 @@ var many = makeParser("many", function(input, subParsers) {
 	}
 });
 
-var any = makeParser("any", function(input, subParsers) {
+var any = constructParser("any", function(input, subParsers) {
 	var result = "";
 
 	if (subParsers.length > 1) { throw new Error("any only takes one parser"); }
@@ -133,11 +181,28 @@ var any = makeParser("any", function(input, subParsers) {
 
 });
 
-var or = makeParser("or", function(input, subParsers) {
+var or = constructParser("or", function(input, subParsers) {
+	var result = "";
+
+	var success = subParsers.some(function(n) {
+		var needleResult = n.parse(input);
+		if (needleResult !== null) {
+			result += needleResult;
+			return true;
+		} else {
+			return false;
+		}
+	});
+
+	if (success) {
+		return result;
+	} else {
+		return null;
+	}
 
 });
 
-var seq = makeParser("seq", function(input, subParsers) {
+var seq = constructParser("seq", function(input, subParsers) {
 	var result = "";
 
 	var success = subParsers.every(function(n) {
