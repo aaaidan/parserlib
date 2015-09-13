@@ -52,6 +52,43 @@ htmlSelfClosingTagNames.forEach(function(tagName) {
 	    return htmlSelfClosingTagName.parse(tagName); }, tagName);
 });
 
+// htmlPairedTagName
+testEqual(
+    "htmlPairedTagName doesn't parse non-existent tagname", function() { 
+    return htmlPairedTagName.parse("kumquat"); }, null);
+
+htmlPairedTagNames.forEach(function(tagName) {
+	testEqual(
+	    "htmlPairedTagName parses " + tagName, function() { 
+	    return htmlPairedTagName.parse(tagName); }, tagName);
+});
+
+// htmlAttributeName
+testEqual(
+    "htmlAttributeName parses 'class' attribute correctly", function() { 
+    return htmlAttributeName.parse("class"); }, "class");
+testEqual(
+    "htmlAttributeName doesn't overstep", function() { 
+    return htmlAttributeName.parse("class=\"fancy\""); }, "class");
+
+// htmlAttributeValue
+testEqual(
+    "htmlAttributeValue parses correctly", function() { 
+    return htmlAttributeValue.parse("\"checked\""); }, "\"checked\"");
+
+// htmlAttribute
+testEqual(
+    "htmlAttribute parses correctly", function() { 
+    return htmlAttribute.parse("type=\"radio\""); }, "type=\"radio\"");
+
+// htmlAttributes
+testEqual(
+    "htmlAttributes parses single attribute", function() { 
+    return htmlAttributes.parse(" class=\"disabled\""); }, " class=\"disabled\"");
+testEqual(
+    "htmlAttributes parses multiple attributes", function() { 
+    return htmlAttributes.parse(" type=\"radio\" class=\"disabled\""); }, " type=\"radio\" class=\"disabled\"");
+
 // htmlSelfClosingTag
 testEqual(
     "htmlSelfClosingTag doesn't parse non-existent tagname", function() { 
@@ -69,21 +106,26 @@ htmlSelfClosingTagNames.forEach(function(tagName) {
 	    return htmlSelfClosingTag.parse("<" + tagName + "/>"); }, "<" + tagName + "/>");
 });
 
-// htmlPairedTagName
 testEqual(
-    "htmlPairedTagName doesn't parse non-existent tagname", function() { 
-    return htmlPairedTagName.parse("kumquat"); }, null);
+    "htmlSelfClosingTag parses a self-closing tag with an attribute", function() { 
+    return htmlSelfClosingTag.parse("<input class=\"disabled\" />"); }, "<input class=\"disabled\" />");
 
-htmlPairedTagNames.forEach(function(tagName) {
-	testEqual(
-	    "htmlPairedTagName parses " + tagName, function() { 
-	    return htmlPairedTagName.parse(tagName); }, tagName);
-});
+testEqual(
+    "htmlSelfClosingTag parses a self-closing start tag with attributes", function() { 
+    return htmlSelfClosingTag.parse("<input class=\"disabled\" type=\"radio\" />"); }, "<input class=\"disabled\" type=\"radio\" />");
 
 // htmlPairedTagStart
 testEqual(
-    "htmlPairedTagStart parses a paired tag", function() { 
+    "htmlPairedTagStart parses a paired start tag", function() { 
     return htmlPairedTagStart.parse("<b>"); }, "<b>");
+
+testEqual(
+    "htmlPairedTagStart parses a paired start tag with an attribute", function() { 
+    return htmlPairedTagStart.parse("<div class=\"disabled\">"); }, "<div class=\"disabled\">");
+
+testEqual(
+    "htmlPairedTagStart parses a paired start tag with attributes", function() { 
+    return htmlPairedTagStart.parse("<div class=\"disabled\" type=\"radio\">"); }, "<div class=\"disabled\" type=\"radio\">");
 
 testEqual(
     "htmlPairedTagStart refuses a self closing tag", function() { 
@@ -91,25 +133,13 @@ testEqual(
 
 // htmlPairedTagEnd
 testEqual(
-    "htmlPairedTagEnd parses a paired tag", function() { 
+    "htmlPairedTagEnd parses a paired end tag", function() { 
     return htmlPairedTagEnd.parse("</b>"); }, "</b>");
 
 testEqual(
     "htmlPairedTagEnd refuses a self closing tag", function() { 
     return htmlPairedTagEnd.parse("</hr>"); }, null);
 
-// htmlAttributeName
-testEqual(
-    "htmlAttributeName parses 'class' attribute correctly", function() { 
-    return htmlAttributeName.parse("class"); }, "class");
-testEqual(
-    "htmlAttributeName doesn't overstep", function() { 
-    return htmlAttributeName.parse("class=\"fancy\""); }, "class");
-
-// htmlAttributeValue
-testEqual(
-    "htmlAttributeValue parses correctly", function() { 
-    return htmlAttributeValue.parse("\"checked\""); }, "\"checked\"");
 
 console.log("Tests Passed:", testsPassed);
 if (testsFailed == 0) {
