@@ -222,8 +222,8 @@ var seq = constructParser("seq", function(input, subParsers) {
 	}
 });
 
-var _ = many(wsChar);
-var __ = any(wsChar);
+var _ = many(wsChar); // mandatory ws
+var __ = any(wsChar); // optional ws
 
 var word = function(needle) {
 	var characterParsers = needle.split('').map(function(needleCharacter) {
