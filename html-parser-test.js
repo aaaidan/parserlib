@@ -41,19 +41,65 @@ function testThrows(title, executor) {
 
 
 
-// htmlTagName
+// htmlSelfClosingTagName
 testEqual(
-    "htmlTagName doesn't parse non-existent tagname", function() { 
-    return htmlTagName.parse("q"); }, null);
+    "htmlSelfClosingTagName doesn't parse non-existent tagname", function() { 
+    return htmlSelfClosingTagName.parse("kumquat"); }, null);
+
+htmlSelfClosingTagNames.forEach(function(tagName) {
+	testEqual(
+	    "htmlSelfClosingTagName parses " + tagName, function() { 
+	    return htmlSelfClosingTagName.parse(tagName); }, tagName);
+});
+
+// htmlSelfClosingTag
 testEqual(
-    "htmlTagName parses b", function() { 
-    return htmlTagName.parse("b"); }, "b");
+    "htmlSelfClosingTag doesn't parse non-existent tagname", function() { 
+    return htmlSelfClosingTag.parse("<kumquat />"); }, null);
+
+htmlSelfClosingTagNames.forEach(function(tagName) {
+	testEqual(
+	    "htmlSelfClosingTag parses " + tagName, function() { 
+	    return htmlSelfClosingTag.parse("<" + tagName + " />"); }, "<" + tagName + " />");
+});
+
+htmlSelfClosingTagNames.forEach(function(tagName) {
+	testEqual(
+	    "htmlSelfClosingTag parses " + tagName + " without trailing space.", function() { 
+	    return htmlSelfClosingTag.parse("<" + tagName + "/>"); }, "<" + tagName + "/>");
+});
+
+// htmlPairedTagName
 testEqual(
-    "htmlTagName parses i", function() { 
-    return htmlTagName.parse("i"); }, "i");
+    "htmlPairedTagName doesn't parse non-existent tagname", function() { 
+    return htmlPairedTagName.parse("kumquat"); }, null);
+
+htmlPairedTagNames.forEach(function(tagName) {
+	testEqual(
+	    "htmlPairedTagName parses " + tagName, function() { 
+	    return htmlPairedTagName.parse(tagName); }, tagName);
+});
+
+// htmlPairedTagStart
 testEqual(
-    "htmlTagName parses u", function() { 
-    return htmlTagName.parse("u"); }, "u");
+    "htmlPairedTagStart parses a paired tag", function() { 
+    return htmlPairedTagStart.parse("<b>"); }, "<b>");
+
+testEqual(
+    "htmlPairedTagStart refuses a self closing tag", function() { 
+    return htmlPairedTagStart.parse("<hr>"); }, null);
+
+// htmlPairedTagEnd
+testEqual(
+    "htmlPairedTagEnd parses a paired tag", function() { 
+    return htmlPairedTagEnd.parse("</b>"); }, "</b>");
+
+testEqual(
+    "htmlPairedTagEnd refuses a self closing tag", function() { 
+    return htmlPairedTagEnd.parse("</hr>"); }, null);
+
+// htmlPairedTag
+
 
 
 console.log("Tests Passed:", testsPassed);
