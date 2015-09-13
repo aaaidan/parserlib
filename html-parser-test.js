@@ -98,9 +98,18 @@ testEqual(
     "htmlPairedTagEnd refuses a self closing tag", function() { 
     return htmlPairedTagEnd.parse("</hr>"); }, null);
 
-// htmlPairedTag
+// htmlAttributeName
+testEqual(
+    "htmlAttributeName parses 'class' attribute correctly", function() { 
+    return htmlAttributeName.parse("class"); }, "class");
+testEqual(
+    "htmlAttributeName doesn't overstep", function() { 
+    return htmlAttributeName.parse("class=\"fancy\""); }, "class");
 
-
+// htmlAttributeValue
+testEqual(
+    "htmlAttributeValue parses correctly", function() { 
+    return htmlAttributeValue.parse("\"checked\""); }, "\"checked\"");
 
 console.log("Tests Passed:", testsPassed);
 if (testsFailed == 0) {
