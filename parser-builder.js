@@ -52,7 +52,7 @@ ParserInput.prototype.next = function() {
 // 	return this._i - this.marks[this.marks.length-1];
 // };
 ParserInput.prototype.toString = function() {
-	return "[ParserInput "+ this._i + ":" + this.str.charAt(this._i) +"]";
+	return "[ParserInput "+ this._i + ":" + this.str.substr(0, this._i + 1) +"]";
 }
 
 var constructParser = function(name, executor, autoConvertStrings) {
@@ -93,8 +93,8 @@ var constructParser = function(name, executor, autoConvertStrings) {
 				}
 				
 				input.mark();
-				
-				debugGroup(name + "(" + subParsers.join(',') + ")");
+
+				debugGroup( (this.customName ? this.customName + ":" : "") + name + "(" + subParsers.join(',') + ")");
 				debugLog("Parsing:", input.toString());
 
 				var result = executor(input, subParsers);
@@ -105,7 +105,7 @@ var constructParser = function(name, executor, autoConvertStrings) {
 					debugWarn("RESULT: Failed");
 					input.rollback();
 				} else {
-					debugLog("RESULT: Success");
+					debugLog("RESULT: Success", "[" + result + "]");
 				}
 
 				return result;
